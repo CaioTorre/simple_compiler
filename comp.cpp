@@ -7,10 +7,19 @@
 #define MAX_STRUCTS 30
 #define HASH_LENGTH 10
 
+//CAIO LIMA E SOUZA DELLA TORRE SANCHES - 17225285
+
+union var_valor {
+	int i;
+	float f;
+	char c;
+};
+
 typedef struct {
 	int tipo;
 	char nome[30];
-	int valor;
+	var_valor valor;
+	//int valor;
 } var;
 
 typedef struct {
@@ -95,17 +104,19 @@ int exec(ll *mem, int *pri, int *disp, char *exp, int line) {
 			i = busca(mem, pri, op1);
 			if (i == -1) { throw_err(undeclared_var, line); return 0; }
 			switch (mem[i].info.tipo) {
-				case 0: printf("int   %5s = ", op1); scanf("%d", &(mem[i].info.valor)); break;
-				case 1: printf("float %5s = ", op1); 
-					float temp_f;
-					scanf("%f", &temp_f);
-					mem[i].info.valor = (int)temp_f;
-					break;
-				case 2: printf("char  %5s = ", op1); 
-					char temp_c;
-					scanf("%c", &temp_c);
-					mem[i].info.valor = (int)temp_c;
-					break;
+				case 0: printf("int   %5s = ", op1); scanf("%d", &(mem[i].info.valor.i)); break;
+				case 1: printf("float %5s = ", op1); scanf("%f", &(mem[i].info.valor.f)); break;
+				case 2: printf("char  %5s = ", op1); scanf("%c", &(mem[i].info.valor.c)); break;
+				//case 1: printf("float %5s = ", op1); 
+				//	float temp_f;
+				//	scanf("%f", &temp_f);
+				//	mem[i].info.valor = (int)temp_f;
+				//	break;
+				//case 2: printf("char  %5s = ", op1); 
+				//	char temp_c;
+				//	scanf("%c", &temp_c);
+				//	mem[i].info.valor = (int)temp_c;
+				//	break;
 				default: throw_err(unknown_type, line); return 0;
 			}
 			
@@ -128,9 +139,9 @@ int exec(ll *mem, int *pri, int *disp, char *exp, int line) {
 			i = busca(mem, pri, op1);
 			if (i == -1) { throw_err(undeclared_var, line); return 0; }
 			switch (mem[i].info.tipo) {
-				case 0: printf("int   %5s = %d\n", op1, mem[i].info.valor); break;
-				case 1: printf("float %5s = %f\n", op1, (float)mem[i].info.valor); break;
-				case 2: printf("char  %5s = %c\n", op1, (char)mem[i].info.valor); break;
+				case 0: printf("int   %5s = %d\n", op1, mem[i].info.valor.i); break;
+				case 1: printf("float %5s = %f\n", op1, mem[i].info.valor.f); break;
+				case 2: printf("char  %5s = %c\n", op1, mem[i].info.valor.c); break;
 				default: throw_err(unknown_type, line); return 0;
 			}
 			
@@ -149,7 +160,7 @@ int exec(ll *mem, int *pri, int *disp, char *exp, int line) {
 			var temp_var;
 			do {
 				temp_var.tipo = 0;
-				temp_var.valor = 0;
+				temp_var.valor.i = 0;
 			
 				i = 0;
 				while (isalpha(*t)) { op1[i++] = *t; t++; }
@@ -170,7 +181,7 @@ int exec(ll *mem, int *pri, int *disp, char *exp, int line) {
 			var temp_var;
 			do {
 				temp_var.tipo = 1;
-				temp_var.valor = 0;
+				temp_var.valor.i = 0;
 			
 				i = 0;
 				while (isalpha(*t)) { op1[i++] = *t; t++; }
@@ -191,7 +202,7 @@ int exec(ll *mem, int *pri, int *disp, char *exp, int line) {
 			var temp_var;
 			do {
 				temp_var.tipo = 2;
-				temp_var.valor = 0;
+				temp_var.valor.i = 0;
 			
 				i = 0;
 				while (isalpha(*t)) { op1[i++] = *t; t++; }
@@ -225,16 +236,16 @@ int exec(ll *mem, int *pri, int *disp, char *exp, int line) {
 
 			switch (op) {
 				case '+':
-					mem[pres].info.valor = mem[pop1].info.valor + mem[pop2].info.valor;
+					mem[pres].info.valor.i = mem[pop1].info.valor.i + mem[pop2].info.valor.i;
 					break;
 				case '-':
-					mem[pres].info.valor = mem[pop1].info.valor - mem[pop2].info.valor;
+					mem[pres].info.valor.i = mem[pop1].info.valor.i - mem[pop2].info.valor.i;
 					break;
 				case '*':
-					mem[pres].info.valor = mem[pop1].info.valor * mem[pop2].info.valor;
+					mem[pres].info.valor.i = mem[pop1].info.valor.i * mem[pop2].info.valor.i;
 					break;
 				case '/':
-					mem[pres].info.valor = mem[pop1].info.valor / mem[pop2].info.valor;
+					mem[pres].info.valor.i = mem[pop1].info.valor.i / mem[pop2].info.valor.i;
 					break;
 				default:
 					throw_err(unknown_op, line); return 0;
@@ -266,7 +277,7 @@ void reset_structs(ll *mem, int *pri, int *disp) {
 	int i;
 	var zero;
 	zero.tipo = 0;
-	zero.valor = 0;
+	zero.valor.i = 0;
 	strcpy(zero.nome, "");
 	for (i = 0; i < HASH_LENGTH; i++) pri[i] = -1;
 	for (i = 0; i < MAX_STRUCTS - 1; i++) { mem[i].link = i + 1; mem[i].info = zero; }
@@ -293,7 +304,7 @@ void exibe(ll *mem, int *pri, int disp) {
 	}
 	printf("\n");
 	for (h = 0; h < MAX_STRUCTS; h++) {
-		printf("\t%2d - %c[%2d | %10s = %3d][%2d]\n", h, (h == disp ? '>' : ' '), mem[h].info.tipo, mem[h].info.nome, mem[h].info.valor, mem[h].link);
+		printf("\t%2d - %c[%2d | %10s = %3d][%2d]\n", h, (h == disp ? '>' : ' '), mem[h].info.tipo, mem[h].info.nome, mem[h].info.valor.i, mem[h].link);
 	}
 	printf("\n");
 }
