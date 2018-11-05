@@ -1,0 +1,6 @@
+int x,y,z;
+read(x,y);
+z=x+y;
+print(x,y,z);
+z=x*y;
+print(z);
